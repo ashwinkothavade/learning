@@ -9,7 +9,7 @@
 **After today you can:**
 - Define "invariant" and name the invariants of a class you write.
 - Explain why `public` data members break encapsulation (with a concrete bug).
-- Write a C++17 class with a private representation, validated constructor, and a minimal public interface.
+- Write a Java class with a private representation, validated constructor, and a minimal public interface.
 - Solve Two Sum in C++ and explain the hash-map trade-off.
 - Make a first structured-output LLM call in Python.
 - Have a FastAPI skeleton with a tested `/health` endpoint.
@@ -48,136 +48,143 @@ Follow-ups to answer: What changes if multiple answers exist? If the array is so
 
 ---
 
-## C. Core SWE — 35 min: Classes, Encapsulation, Invariants
+## C. Core SWE (OOP in Java) — 35 min: Classes, Encapsulation, Invariants
 
 ### 0. Starting from zero: the building blocks (read first, ~10 min)
 
-**Class vs object.** A class is a blueprint (a type); an object is one concrete thing built from it. `Account` is the class; "account #101" is an object. Each object has its own copy of the data.
+**Class vs object.** A class is a blueprint (a type); an object is one concrete thing built from it. `Account` is the class; "account #101" is an object. Each object has its own copy of its instance data.
 
-**Creating objects in C++.** No `new` needed for most objects:
-```cpp
-Account a{100};                       // lives on the stack, destroyed at end of scope
-auto b = std::make_unique<Account>(100); // lives on the heap, owned by a smart pointer
-Account& r = a;                       // r is another name for the SAME object
-Account c = a;                        // c is a COPY: a separate object
+**What `new` does (conceptual JVM model).** `Account a = new Account(100);`
+1. Memory for the object is allocated (typically on the heap).
+2. Fields get default values (0, null, false).
+3. The constructor runs.
+4. A **reference** to the object is returned and stored in `a`.
+
+```java
+Account a = new Account(100);
+Account b = a;          // copies the REFERENCE: a and b are the same object
+b.deposit(50);          // visible through a too
+Account c = new Account(100);  // a different object
+a == c;                 // false: == compares references; equals() compares content (if overridden)
 ```
-Contrast with Java, where `Account b = a;` copies a *reference*. In C++, assignment copies the object unless you use a reference or pointer. Know this difference; interviewers ask it.
+Java variables of class type are references; objects are never copied implicitly. (In C++ `Account c = a;` copies the object; interviewers like this contrast.) Java passes references **by value**: a method can mutate the object it receives, but cannot repoint your variable.
 
-**Constructors.** A special function that runs when an object is created and sets it up. Same name as the class, no return type. Use the *member initializer list* (`: balance_(x)`), not assignment in the body. Mark single-argument constructors `explicit` to prevent surprising implicit conversions. Constructors can be overloaded. If you declare any constructor, the compiler stops generating the default one.
+**Constructors.** Same name as the class, no return type, run once at creation to set the object up. If you declare none, Java supplies a default no-arg constructor; declare any, and the default disappears. Constructors can be overloaded and can chain with `this(...)` (must be the first statement). They are not inherited. Make sure no constructor leaves an object half-valid.
 
-**`this`.** A pointer to the object a member function was called on. `this->balance_` is the same as `balance_`.
+**`this`.** The current object. `this.balance = balance;` distinguishes the field from the parameter.
 
 **Instance vs static members.**
-```cpp
-class Employee {
-public:
-    explicit Employee(std::string n) : name_(std::move(n)) { ++count_; }
-    static int count() { return count_; }   // no 'this': can't touch name_
-private:
-    std::string name_;                       // one per object
-    inline static int count_ = 0;            // one per class (C++17 inline static)
-};
+```java
+public class Employee {
+    private static int count = 0;      // one per CLASS
+    private final String name;         // one per OBJECT
+
+    public Employee(String name) {
+        this.name = Objects.requireNonNull(name);
+        count++;                       // NOT thread-safe!
+    }
+    public static int getCount() { return count; }   // no 'this': cannot read 'name'
+}
 ```
-A static function has no `this`, so it can't directly read instance fields; it needs an object passed in.
+A static method has no `this`, so it can't touch instance fields without an object passed in.
 
-**Interview trap: static is shared mutable state.** If 100 threads construct `Employee`, `++count_` is a data race: lost updates, and in C++ formally undefined behavior. Fix: `std::atomic<int>`. "Static" never means "thread-safe". (Full treatment in Week 3.)
+**Interview trap: static is shared mutable state.** 100 threads constructing `Employee` race on `count++` (read-modify-write, not atomic), causing lost updates. Fix with `AtomicInteger`. "Static" never means "thread-safe". (Full treatment in Week 3.)
 
-**Practice (10 min):** write the `Employee` above, create three objects, print `count()`, then try to read `name_` from `count()` and read the compiler error.
+**Practice (10 min):** write `Employee`, create three objects, print `getCount()`; then try to read `name` inside `getCount()` and read the compiler error. Create two threads that each construct 100,000 employees and see whether the count is 200,000.
 
 ### 1. Definitions
-- **Class:** a user-defined type bundling *state* (data members) and *operations* (member functions).
-- **Object:** an instance: a region of storage with a type and a lifetime.
-- **Encapsulation:** hiding the representation behind an interface so that **only the class's own code can change state**.
-- **Invariant:** a condition that must hold for every *valid* object whenever it is observable from outside (after construction, before/after each public member call).
+- **Class:** a user-defined type bundling *state* (fields) and *behavior* (methods).
+- **Object:** an instance of a class with identity, state and behavior.
+- **Encapsulation:** hiding the representation behind an interface so only the class's own code can change state.
+- **Invariant:** a condition that must hold for every valid object whenever it is observable from outside (after construction and around every public method).
 
 Encapsulation is the *mechanism*; invariants are the *reason*.
 
 ### 2. Why it exists
-If any code can write any field, correctness of the object depends on every caller in the codebase. With encapsulation, correctness depends on a few member functions. Bugs get localized, and you can change representation without breaking callers.
+If any code can write any field, correctness depends on every caller. With encapsulation, correctness depends on a few methods. Bugs are localized and you can change representation without breaking callers.
 
-### 3. Internal working in C++
-- `class` defaults to `private`, `struct` to `public`. Otherwise identical. Convention: `struct` for passive data with no invariant, `class` when there is one.
-- `private` is a **compile-time access check**, not runtime security. Layout is unchanged; `reinterpret_cast` can still defeat it. It protects against mistakes, not malice.
-- A non-static member function receives a hidden `this` pointer. `const` member functions get `const T* this`, so they cannot mutate (except `mutable` members).
-- Object layout: data members laid out in declaration order with padding for alignment; `sizeof` may exceed the sum of fields. Member functions are not stored per object.
-- Constructor's job: **establish the invariant** or throw. A constructor that leaves a half-valid object is the root of "zombie object" bugs. (RAII details: Day 2.)
+### 3. Internal working in Java
+- Access modifiers: `private` (class only), package-private (default), `protected` (package + subclasses), `public`. They are compile-time checks (reflection can bypass them, so they protect against mistakes, not malice).
+- Instance methods receive a hidden `this`. `final` fields must be assigned exactly once by the end of the constructor and give you safe-publication guarantees under the Java Memory Model (preview, Week 3).
+- Constructors establish the invariant or **throw**. Never let `this` escape from a constructor (e.g., registering it as a listener) before construction finishes; other threads or callbacks can see a half-built object.
+- Object identity (`==`) vs equality (`equals`/`hashCode`): if you override one you must override the other. Mutable fields used in `hashCode` break `HashMap` lookups.
+- Immutability is the strongest form of encapsulation: `final` class, `private final` fields, no setters, defensive copies of mutable inputs/outputs. Java `record` gives this for simple values.
 
 ### 4. Example: broken vs. protected
 
-```cpp
+```java
 // BAD: no invariant enforcement
-struct Account { long long balance; };
-Account a{100};
-a.balance = -5000;          // legal, nonsense
+class BadAccount { public long balance; }
+BadAccount a = new BadAccount();
+a.balance = -5000;                 // legal, nonsense
 
 // GOOD
-#include <stdexcept>
-#include <cstdint>
+public final class Account {
+    // INVARIANT: balance >= 0 (minor units, e.g. paise)
+    private long balance;
 
-class Account {
-public:
-    explicit Account(std::int64_t opening_paise) : balance_(opening_paise) {
-        if (opening_paise < 0) throw std::invalid_argument("negative opening balance");
+    public Account(long openingPaise) {
+        if (openingPaise < 0) throw new IllegalArgumentException("negative opening balance");
+        this.balance = openingPaise;
     }
-    std::int64_t balance() const noexcept { return balance_; }
 
-    void deposit(std::int64_t paise) {
-        if (paise <= 0) throw std::invalid_argument("deposit must be positive");
-        // overflow guard: keeps invariant balance_ <= INT64_MAX
-        if (balance_ > INT64_MAX - paise) throw std::overflow_error("overflow");
-        balance_ += paise;
+    public long getBalance() { return balance; }
+
+    public void deposit(long paise) {
+        if (paise <= 0) throw new IllegalArgumentException("deposit must be positive");
+        this.balance = Math.addExact(balance, paise);      // throws on overflow
     }
-    void withdraw(std::int64_t paise) {
-        if (paise <= 0) throw std::invalid_argument("withdraw must be positive");
-        if (paise > balance_) throw std::runtime_error("insufficient funds");
-        balance_ -= paise;
+
+    public void withdraw(long paise) {
+        if (paise <= 0) throw new IllegalArgumentException("withdraw must be positive");
+        if (paise > balance) throw new IllegalStateException("insufficient funds");
+        this.balance -= paise;
     }
-private:
-    // INVARIANT: 0 <= balance_ <= INT64_MAX
-    std::int64_t balance_;
-};
+}
 ```
-
-Observations: money in integer minor units (never `double`); getter returns by value; failing operations leave state unchanged (**strong exception guarantee**: check first, mutate last).
+Observations: money is integer minor units (never `double`); validation comes first and mutation last, so a failed call leaves state unchanged (**strong exception guarantee**); `Math.addExact` protects the invariant against overflow.
 
 ### 5. Backend relevance
-- DB analog: `CHECK (balance >= 0)`, `NOT NULL`, foreign keys are invariants enforced at the storage layer. App-level classes and DB constraints are **two layers of defence**; the DB is the last one, because multiple services may write.
-- Domain objects (Order, Payment) in DDD are aggregates whose root enforces invariants ("order total = sum of lines").
-- Concurrency: an invariant spanning two fields (`balance_` and `version_`) is only safe if updates are atomic (Week 3).
+- DB analog: `CHECK (balance >= 0)`, `NOT NULL`, foreign keys are invariants at the storage layer. App classes and DB constraints are **two layers of defence**; the DB is the last because many services may write.
+- Spring entities and DDD aggregates: the aggregate root enforces invariants ("order total = sum of lines"). Anemic entities with public setters push that logic into scattered services.
+- Concurrency: an invariant spanning two fields is only safe if updates are atomic (Week 3). `private` is not thread-safe.
 
 ### 6. Common mistakes / misconceptions
-1. **Getter/setter for every field** = public fields with extra typing. Expose *behaviour* (`withdraw`), not *state* (`setBalance`).
-2. Returning a non-const reference/pointer to an internal member leaks the representation: `auto& items()` lets callers break invariants.
+1. **Getter and setter for every field** = public fields with extra typing. Expose behavior (`withdraw`), not state (`setBalance`).
+2. Returning a mutable internal object (`List`, `Date`, array) from a getter lets callers break invariants. Return an unmodifiable view or a copy (`List.copyOf`).
 3. Validating in setters but not the constructor (or vice versa).
-4. Believing `private` = thread-safe. It is not.
-5. Invariants documented nowhere. Write them as a comment on the private section and as `assert`s/tests.
-6. Using `double` for money.
-7. Confusing *class invariant* with *precondition* (caller's obligation) and *postcondition* (callee's promise). Invariant holds between calls; preconditions are checked per call.
+4. Believing `private` means thread-safe.
+5. Invariants documented nowhere. Write them as a comment on the fields and as tests.
+6. Using `double` for money. Use `long` minor units or `BigDecimal` with an explicit scale.
+7. Confusing class invariant with precondition (caller's obligation) and postcondition (callee's promise).
+8. Thinking Java is pass-by-reference. It is pass-by-value of the reference.
 
 ### 7. When useful / not
-- Use a class when there is an invariant linking multiple fields or a representation likely to change.
-- Plain `struct` is right for DTOs, config, POD records with independent fields. Don't ceremony it.
+- Use a class with private state when an invariant links multiple fields or the representation may change.
+- A plain `record` or simple data holder is right for DTOs and config. Don't add ceremony.
 
-### 8. Exercises (do in `core-swe/day-01/`)
-1. Add `transfer(Account& to, int64 amount)` to the class above. Which invariants matter? What if `to` is `*this`? What happens if `to.deposit` throws after `withdraw` succeeded? Fix it.
-2. Write a `class DateRange` with invariant `start <= end`. Decide: can it be mutated? Implement `contains`, `overlaps`. Then answer: could you make it immutable, and what does that buy you?
-3. Write a `class Temperature` which stores Kelvin privately but exposes `fromCelsius`/`toCelsius`. Demonstrate that you could change internals without touching callers.
-4. Print `sizeof` of `struct {char a; int b; char c;}` and of the reordered version; explain.
+### 8. Exercises (do in `core-swe/day-01/`, Java 17+)
+1. Add `transfer(Account to, long amount)`. Which invariants matter? What if `to == this`? What if the deposit throws after the withdraw succeeded? Fix it.
+2. Write `DateRange` with invariant `start <= end`. Make it immutable (`record` with a compact constructor check). Implement `contains` and `overlaps`. What does immutability buy you?
+3. Write `Temperature` storing Kelvin privately, with `fromCelsius`/`toCelsius`. Show you could change the internals without touching callers.
+4. Demonstrate reference semantics: write a method `void reset(Account a)` that sets `a = null` and another that calls `a.deposit(1)`. Predict, then run, and explain what the caller observes.
 
 ### 9. Interview questions
 - What is encapsulation, and how does it differ from abstraction?
-- What is a class invariant? Give an example and say where it is established and preserved.
+- What is a class invariant? Where is it established and preserved?
 - Why are getters/setters not automatically encapsulation?
-- `struct` vs `class` in C++?
-- Why shouldn't a getter return a non-const reference to a member?
-- How does `const` on a member function help preserve invariants? What is `mutable` for?
-- How would you enforce the same invariant in app code and in PostgreSQL?
+- Class vs object? What happens when you use `new`?
+- Static vs instance members? Why can't a static method read an instance field?
+- `==` vs `equals()`? Why override `hashCode` with `equals`?
+- Is Java pass-by-value or pass-by-reference?
+- Why is a `private` getter returning a `List` field still a leak?
+- How would you enforce the same invariant in app code and PostgreSQL?
 
-**Follow-ups:** Can an invariant be temporarily broken? (Yes, inside a member function; must be restored before returning or the exception propagates, and then the strong guarantee matters.) How do invariants interact with inheritance? (Preview Day 6, LSP.) How does multithreading change this?
+**Follow-ups:** Can an invariant be temporarily broken? (Inside a method, yes; restored before returning or the exception escapes, hence the strong guarantee.) How do invariants interact with inheritance? (Preview Day 6, LSP.) How does multithreading change this?
 
 ---
 
-## D. LLD — 30 min: Design `Money` and `BankAccount` (foundation for Day 50)
+## D. LLD (Java) — 30 min: Design `Money` and `Account` (foundation for Day 50)
 
 **Scope today:** classes, invariants, interface. No inheritance, no patterns, no persistence yet.
 
@@ -186,34 +193,34 @@ Observations: money in integer minor units (never `double`); getter returns by v
 
 **Entities:**
 ```
-Money        — value type: int64 minor units + currency code. Invariant: amount fits int64; same-currency arithmetic only.
-AccountId    — strong type wrapping a string/uint64 (prevents mixing ids with amounts).
-Account      — id_, balance_ (Money). Invariant: balance_ >= 0, currency fixed for life.
+Money      — immutable value type: long minorUnits + Currency. Same-currency arithmetic only.
+AccountId  — strong type wrapping a String (prevents mixing ids with amounts).
+Account    — id, balance (Money). Invariant: balance >= 0, currency fixed for life.
 ```
 **Textual UML:**
 ```
 +-----------+ 1     1 +---------+
 | Account   |-------->| Money   |
-| -id_      |         | -minor_ |
-| -balance_ |         | -ccy_   |
-| +deposit  |         | +add    |
-| +withdraw |         | +sub    |
+| -id       |         | -minor  |
+| -balance  |         | -ccy    |
+| +deposit  |         | +plus   |
+| +withdraw |         | +minus  |
 +-----------+         +---------+
 ```
-**Your task (write in `lld/day-01/`):**
-1. Implement `Money` (immutable; `operator+`, `operator-` that throw on currency mismatch/overflow; comparison).
+**Your task (write in `lld/day-01/`, Java 17+, JUnit 5 or plain asserts):**
+1. Implement `Money` as an immutable class or `record` (`plus`, `minus` throw on currency mismatch/overflow; `compareTo`).
 2. Implement `Account` using `Money`.
-3. Write `transfer` as a free function or a member, and justify your choice. Ensure atomic-looking behaviour on failure.
-4. Write 8 tests (plain `assert` is fine): invalid construction, boundary withdraw (exactly balance), overdraft, currency mismatch, self-transfer, overflow, failed transfer leaves both balances unchanged.
-5. Write 5 sentences: which invariants live in `Money` vs `Account`, and what you would do about concurrency (just describe; Week 3 implements it).
+3. Write `transfer` as a member or a separate service, and justify the choice. A failed transfer must leave both balances unchanged.
+4. Write 8 tests: invalid construction, withdraw exactly the balance, overdraft, currency mismatch, self-transfer, overflow, failed transfer leaves both balances unchanged, a mutation through a getter is impossible.
+5. Write 5 sentences: which invariants live in `Money` vs `Account`, and how you would handle concurrency (describe only; Week 3 implements it).
 
 **Warm-up design (10 min, paper only): "PrepTrack", a study tracker.** Entities: User, StudyTask, StudySession, Progress. Answer in writing:
 1. Is a task *definition* ("Solve Two Sum") the same thing as a *completion record* (who did it, when, how long)? Why should they be separate?
 2. What happens if a user completes the same task twice? (Idempotency preview.)
 3. Draft three endpoints: `GET /api/v1/study-sessions/today`, `POST /api/v1/tasks/{id}/complete`, `GET /api/v1/progress` (paginated). Note auth, the already-completed case, and what each returns.
-Deliver: 4 entities × 5 fields, 2 relationships, 1 design issue you spotted.
+Deliver: 4 entities x 5 fields, 2 relationships, 1 design issue you spotted.
 
-**Think about (don't build yet):** DB schema `accounts(id, balance_minor BIGINT CHECK (balance_minor >= 0), currency CHAR(3), version INT)`; audit trail as append-only ledger; idempotency key for transfers; metrics on failed withdrawals.
+**Think about (don't build yet):** DB schema `accounts(id, balance_minor BIGINT CHECK (balance_minor >= 0), currency CHAR(3), version INT)`; append-only ledger for audit; idempotency key for transfers; metrics on failed withdrawals.
 
 ---
 
@@ -339,13 +346,13 @@ Example shape: "Built X using Kafka and Postgres handling N events/day, cutting 
 
 **Tasks:** Two Sum in C++ · Account/DateRange/Temperature exercises · Money+Account LLD with 8 tests · `extract.py` + fake-client test · FastAPI skeleton passing · OSS shortlist · resume bullets.
 
-**Deliverables (commit to repo):** `dsa/day-01/two_sum.cpp`, `core-swe/day-01/*.cpp`, `lld/day-01/*`, `ai-engineering/day-01/*`, `projects/knowledge-assistant/*`, `open-source/shortlist.md`, `career/day-01/bullets.md`.
+**Deliverables (commit to repo):** `dsa/day-01/two_sum.cpp`, `core-swe/day-01/*.java`, `lld/day-01/*`, `ai-engineering/day-01/*`, `projects/knowledge-assistant/*`, `open-source/shortlist.md`, `career/day-01/bullets.md`.
 
 **You should be able to answer:**
 1. Define invariant; state the invariants of `Account`.
 2. Why do setters not equal encapsulation?
 3. Two Sum: complexity, and why one-pass insertion order matters.
-4. Why integer minor units for money?
+4. Why integer minor units for money? What does Java pass: value or reference?
 5. Why is an LLM call a failure-prone dependency, and what do you do about it?
 6. Why does a model need the entire history re-sent?
 
@@ -353,4 +360,4 @@ Example shape: "Built X using Kafka and Postgres handling N events/day, cutting 
 
 **Progress log:** time spent per track, what was hard, what you got stuck on, test output evidence, commit hashes, open questions.
 
-**Tomorrow (Day 2):** Constructors, destructors, RAII, copy and move semantics. Expect DSA: Valid Parentheses-class stack problem, and a resource-owning class (`FileHandle`/`Buffer`) to implement with the Rule of Five.
+**Tomorrow (Day 2):** Constructors, initialization, object lifecycle, copying vs references (Java counterpart of RAII/copy semantics). Expect DSA: Valid Parentheses-class stack problem, and Java object lifecycle: constructors, initialization order, `final`, `try-with-resources`/`AutoCloseable`, `equals`/`hashCode`, plus a resource-owning class to implement.
