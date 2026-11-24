@@ -1,5 +1,7 @@
 # Time Plan (applies from Day 2; Day 1 was delivered with the original 7-track split)
 
+See CURRICULUM.md for the topic of each day.
+
 Decision (2026-11-24): fundamentals first. DSA is a strength, so it is kept as light maintenance. AI Engineering and the portfolio project start in Week 5, when the backend curriculum begins.
 
 | Phase | DSA (C++) | Core SWE (Java) | LLD/HLD (Java for LLD) | AI (Python) | Project (Python) | Open source | Career | Total |
