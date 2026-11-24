@@ -22,3 +22,7 @@ Calibrate everything to SWE-2 interviews, not new-grad ones.
 - Core/backend depth: DB internals (indexes, transactions, isolation), concurrency bugs, caching, queues, failure handling, observability. Questions are "how did you handle X in production" as often as "define X".
 - Behavioral: ownership, impact with numbers, incidents and debugging, disagreement, mentoring juniors, scope and ambiguity. Build 6-8 STAR stories from real Akatsuki work.
 - Every lesson should include at least one "production incident / trade-off" question, not only definitions.
+
+## Teaching format rules
+- Every concept gets a relevant diagram: Mermaid blocks in the markdown files (GitHub renders them), ASCII in chat. Use class, sequence, state, flow and architecture diagrams as appropriate.
+- Videos: when a topic is better learned by watching, the lesson has a "Watch (optional)" line naming the topic and a search phrase. Links are never invented; only verified URLs are given.

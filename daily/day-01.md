@@ -92,6 +92,37 @@ A static method has no `this`, so it can't touch instance fields without an obje
 
 **Practice (10 min):** write `Employee`, create three objects, print `getCount()`; then try to read `name` inside `getCount()` and read the compiler error. Create two threads that each construct 100,000 employees and see whether the count is 200,000.
 
+**Diagram: references vs objects (what `b = a` really does)**
+```mermaid
+flowchart LR
+    subgraph Stack
+      a["a (reference)"]
+      b["b (reference)"]
+      c["c (reference)"]
+    end
+    subgraph Heap
+      o1["Account#1 balance=150"]
+      o2["Account#2 balance=100"]
+    end
+    a --> o1
+    b --> o1
+    c --> o2
+```
+
+**Diagram: object lifecycle of `new Account(100)`**
+```mermaid
+sequenceDiagram
+    participant Caller
+    participant JVM
+    participant Heap
+    Caller->>JVM: new Account(100)
+    JVM->>Heap: allocate, fields = defaults
+    JVM->>Heap: run constructor, validate, set balance
+    JVM-->>Caller: reference to the object
+```
+
+**Watch (optional, 10 min):** Java memory model basics, stack vs heap and references. Search: "Java stack vs heap references explained".
+
 ### 1. Definitions
 - **Class:** a user-defined type bundling *state* (fields) and *behavior* (methods).
 - **Object:** an instance of a class with identity, state and behavior.
@@ -201,6 +232,25 @@ Money      — immutable value type: long minorUnits + Currency. Same-currency a
 AccountId  — strong type wrapping a String (prevents mixing ids with amounts).
 Account    — id, balance (Money). Invariant: balance >= 0, currency fixed for life.
 ```
+**Class diagram:**
+```mermaid
+classDiagram
+    class Account {
+      -AccountId id
+      -Money balance
+      +deposit(Money)
+      +withdraw(Money)
+      +getBalance() Money
+    }
+    class Money {
+      -long minorUnits
+      -Currency currency
+      +plus(Money) Money
+      +minus(Money) Money
+    }
+    Account --> Money : has
+```
+
 **Textual UML:**
 ```
 +-----------+ 1     1 +---------+
