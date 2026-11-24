@@ -33,3 +33,8 @@ Calibrate everything to SWE-2 interviews, not new-grad ones.
 - Each new concept: analogy, tiny code, diagram, what goes wrong without it, then the interview question and a model answer.
 - Put the beginner lesson in `core-swe/day-NN/LESSON.md` (and equivalents for other tracks); daily/day-NN.md links to it first.
 - Interview focus stays: after the explanation, include timed interview questions, follow-ups and production-style questions.
+
+## DSA files: LeetCode style (user request)
+- Each DSA problem file reproduces the LeetCode page: title and link, statement, examples, constraints, follow-up, then the exact `class Solution` stub with LeetCode's signature (no `main` inside the part the user edits).
+- A local harness below the class replaces LeetCode's judge: example and edge test cases, verdict lines "Accepted" / "Wrong Answer", any-order answers compared after sorting where LeetCode allows it. The user pastes the same class into LeetCode when done.
+- Use LeetCode-supported includes explicitly (no bits/stdc++.h, it is missing on macOS clang).

@@ -11,7 +11,7 @@
 ---
 
 ## B. DSA — 20 min: Two Sum — **done**
-Your hash-map solution was reviewed. **YOUR TURN (5 min):** paste it into [two_sum.cpp](../dsa/day-01/two_sum.cpp), apply the review notes (loop from 0, single lookup, earlier index first), and run the tests ([README](../dsa/day-01/README.md)). Then answer the 3 follow-ups written at the bottom of that file. Remaining time: read tomorrow's DSA topic, no new problem today.
+Your hash-map solution was reviewed. **YOUR TURN (5 min):** open [two_sum.cpp](../dsa/day-01/two_sum.cpp). It looks like the LeetCode editor: the problem statement, then `class Solution` with the exact signature. Paste your solution inside the class, apply the review notes (loop from 0, single lookup, earlier index first), and run it; the verdicts read "Accepted" or "Wrong Answer" ([README](../dsa/day-01/README.md)). When it passes, submit the same class on LeetCode. Then answer the 3 follow-ups written at the bottom of that file. Remaining time: read tomorrow's DSA topic, no new problem today.
 
 ---
 
