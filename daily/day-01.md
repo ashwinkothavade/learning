@@ -52,6 +52,8 @@ Follow-ups to answer: What changes if multiple answers exist? If the array is so
 
 ## C. Core SWE (OOP in Java) — 75 min: Classes, Encapsulation, Invariants
 
+**START HERE: [beginner lesson with step-by-step explanations](../core-swe/day-01/LESSON.md).** Read it before the notes below, which are the condensed reference version.
+
 ### 0. Starting from zero: the building blocks (read first, ~10 min)
 
 **Class vs object.** A class is a blueprint (a type); an object is one concrete thing built from it. `Account` is the class; "account #101" is an object. Each object has its own copy of its instance data.

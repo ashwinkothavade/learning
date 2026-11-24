@@ -27,3 +27,9 @@ Calibrate everything to SWE-2 interviews, not new-grad ones.
 - Every concept gets a relevant diagram: Mermaid blocks in the markdown files (GitHub renders them), ASCII in chat. Use class, sequence, state, flow and architecture diagrams as appropriate.
 - Videos: when a topic is better learned by watching, the lesson has a "Watch (optional)" line naming the topic and a search phrase. Include the video link too. Find it with a web search and use only URLs that appeared in results (never invent or guess); say it was found by search and not reviewed in full.
 - Exercise workspaces: every day, each exercise lives in a runnable skeleton file (Java for OOP/LLD/concurrency, C++ for DSA) in the matching track folder, e.g. `core-swe/day-NN/`, `lld/day-NN/`, `dsa/day-NN/`. Each file has TODOs, a `main` with tests (exit code 0 = pass), and a WRITTEN ANSWERS spot. A README gives run commands. daily/day-NN.md links to these files instead of repeating exercises. Verify that skeletons compile and fail before delivery; never pre-fill solutions.
+
+## Explanation style (user request: teach as if a complete beginner)
+- Assume no prior knowledge. Define every term and every keyword in code the first time it appears; use everyday analogies, small steps, and a "Try it" after each step.
+- Each new concept: analogy, tiny code, diagram, what goes wrong without it, then the interview question and a model answer.
+- Put the beginner lesson in `core-swe/day-NN/LESSON.md` (and equivalents for other tracks); daily/day-NN.md links to it first.
+- Interview focus stays: after the explanation, include timed interview questions, follow-ups and production-style questions.
