@@ -38,3 +38,7 @@ Calibrate everything to SWE-2 interviews, not new-grad ones.
 - Each DSA problem file reproduces the LeetCode page: title and link, statement, examples, constraints, follow-up, then the exact `class Solution` stub with LeetCode's signature (no `main` inside the part the user edits).
 - A local harness below the class replaces LeetCode's judge: example and edge test cases, verdict lines "Accepted" / "Wrong Answer", any-order answers compared after sorting where LeetCode allows it. The user pastes the same class into LeetCode when done.
 - Use LeetCode-supported includes explicitly (no bits/stdc++.h, it is missing on macOS clang).
+
+## Interview vocabulary rule (user request)
+- Main aim: clear interviews AND learn as a real software engineer. Every day has an "Interview vocabulary" section: the exact technical terms interviewers listen for, each with a one-sentence model phrasing, plus a short spoken practice.
+- Answers are judged on correct use of these terms, trade-off reasoning, and real engineering practice (tests, failure handling, production thinking), not memorization.

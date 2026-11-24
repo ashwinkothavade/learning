@@ -122,6 +122,29 @@ Write 2 project bullets from real work (action verb + what you built + scale + t
 
 ---
 
+## H. Interview vocabulary: say it the way interviewers expect
+
+Use these exact terms in answers. Format: **term**: how to say it in one sentence.
+
+- **Encapsulation**: "Bundling state with the methods that operate on it and restricting direct access, so the class can enforce its invariants."
+- **Invariant**: "A condition that must hold for every valid object whenever it is visible to callers; the constructor establishes it and every public method preserves it."
+- **Abstraction vs encapsulation**: abstraction exposes *what* an object does and hides complexity; encapsulation protects *how* state changes. Different ideas, often confused.
+- **Reference semantics / pass-by-value of the reference**: "Java always passes by value; for objects the value is the reference, so a method can mutate the object but cannot repoint the caller's variable."
+- **Heap vs stack**: objects live on the heap and are garbage collected; local variables and references live on the thread's stack.
+- **Identity vs equality**: `==` compares references; `equals` compares logical content. "If you override `equals` you must override `hashCode`; equal objects must have equal hash codes."
+- **Immutability / value object**: "Its state cannot change after construction, so it is inherently thread-safe and safe as a map key."
+- **Defensive copy / unmodifiable view**: "Don't leak internal mutable state; return a copy or read-only view."
+- **Fail-fast / validate at the boundary**: "Reject invalid input in the constructor or method entry so an invalid object never exists."
+- **Strong exception guarantee**: "If an operation fails, state is unchanged: validate first, mutate last."
+- **Race condition / atomicity**: "`count++` is read-modify-write, not atomic; two threads can interleave and lose an update. Use `AtomicInteger` or a lock."
+- **Shared mutable state**: "The root cause of most concurrency bugs; `static` mutable fields are shared by all threads."
+- **Two layers of defence**: "Enforce invariants in the domain class and again in the database with `CHECK`/`NOT NULL`/foreign keys, since other writers may exist."
+- **Minor units**: "Store money as integer minor units or `BigDecimal`, never `float`/`double`, to avoid rounding error."
+
+**Practice (3 min):** pick 5 terms and say each aloud in your own words with an example. If you cannot, reread the matching LESSON step.
+
+---
+
 ## G. End-of-day checklist
 - [ ] Two Sum saved and tests pass in `two_sum.cpp`
 - [ ] Examples 1-4 run and read
