@@ -25,4 +25,5 @@ Calibrate everything to SWE-2 interviews, not new-grad ones.
 
 ## Teaching format rules
 - Every concept gets a relevant diagram: Mermaid blocks in the markdown files (GitHub renders them), ASCII in chat. Use class, sequence, state, flow and architecture diagrams as appropriate.
-- Videos: when a topic is better learned by watching, the lesson has a "Watch (optional)" line naming the topic and a search phrase. Links are never invented; only verified URLs are given.
+- Videos: when a topic is better learned by watching, the lesson has a "Watch (optional)" line naming the topic and a search phrase. Include the video link too. Find it with a web search and use only URLs that appeared in results (never invent or guess); say it was found by search and not reviewed in full.
+- Exercise workspaces: every day, each exercise lives in a runnable skeleton file (Java for OOP/LLD/concurrency, C++ for DSA) in the matching track folder, e.g. `core-swe/day-NN/`, `lld/day-NN/`, `dsa/day-NN/`. Each file has TODOs, a `main` with tests (exit code 0 = pass), and a WRITTEN ANSWERS spot. A README gives run commands. daily/day-NN.md links to these files instead of repeating exercises. Verify that skeletons compile and fail before delivery; never pre-fill solutions.

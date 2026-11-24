@@ -39,6 +39,8 @@ Time budget (Weeks 1-4 split, see PLAN.md): DSA 20 · Core 75 · LLD/HLD 55 · O
 - Sort + two pointers: O(n log n), but you lose original indices (must carry them) — O(n) space.
 - Hash map one pass: O(n) average time, O(n) space. Worst-case hash collisions degrade; mention it.
 
+**Workspace (fill in and run):** [dsa/day-01/two_sum.cpp](../dsa/day-01/two_sum.cpp), see [README](../dsa/day-01/README.md) for the run command.
+
 **Your task:** implement `vector<int> twoSum(vector<int>& nums, int target)` in C++17 in `dsa/day-01/two_sum.cpp`, with a `main` that asserts the tests below.
 
 **Test requirements:** `[2,7,11,15],9→[0,1]` · `[3,2,4],6→[1,2]` · `[3,3],6→[0,1]` · negatives `[-1,-2,-3,-4,-5],-8→[2,4]` · `[0,4,3,0],0→[0,3]`.
@@ -121,7 +123,7 @@ sequenceDiagram
     JVM-->>Caller: reference to the object
 ```
 
-**Watch (optional, 10 min):** Java memory model basics, stack vs heap and references. Search: "Java stack vs heap references explained".
+**Watch (optional, 10 min):** Java memory model basics, stack vs heap and references. [Stack vs Heap in Java Explained Visually](https://www.youtube.com/watch?v=frOT6yXG0j0) (found via search; check it matches the lesson).
 
 ### 1. Definitions
 - **Class:** a user-defined type bundling *state* (fields) and *behavior* (methods).
@@ -204,6 +206,9 @@ Observations: money is integer minor units (never `double`); validation comes fi
 6. Mini-build (25 min): `Library` with `Book` and `Member`. Invariants: a book is borrowed by at most one member; a member holds at most 3 books. Decide what is public, what is immutable, and how to prevent the caller from mutating internal lists. Write 6 tests including the failure paths.
 7. Verbal drill (5 min): explain class vs object, constructors, `new`, static vs instance and pass-by-value-of-reference in 3 minutes without notes. Record yourself.
 
+**Workspace (fill in and run; tests and written answers inside each file):** [README with run commands](../core-swe/day-01/README.md)
+[Ex0 static counter](../core-swe/day-01/Ex0_StaticCounter.java) · [Ex1 transfer](../core-swe/day-01/Ex1_AccountTransfer.java) · [Ex2 DateRange](../core-swe/day-01/Ex2_DateRange.java) · [Ex3 Temperature](../core-swe/day-01/Ex3_Temperature.java) · [Ex4 references](../core-swe/day-01/Ex4_References.java) · [Ex5 equals/hashCode](../core-swe/day-01/Ex5_EqualsHashCode.java) · [Ex6 Library](../core-swe/day-01/Ex6_Library.java)
+
 ### 9. Interview questions
 - What is encapsulation, and how does it differ from abstraction?
 - What is a class invariant? Where is it established and preserved?
@@ -273,6 +278,8 @@ classDiagram
 2. What happens if a user completes the same task twice? (Idempotency preview.)
 3. Draft three endpoints: `GET /api/v1/study-sessions/today`, `POST /api/v1/tasks/{id}/complete`, `GET /api/v1/progress` (paginated). Note auth, the already-completed case, and what each returns.
 Deliver: 4 entities x 5 fields, 2 relationships, 1 design issue you spotted.
+
+**Workspace (fill in and run):** [lld/day-01/LldDay01.java](../lld/day-01/LldDay01.java) holds Money, Account, transfer, the Cart drill, 8 tests and written answers. Run: `java lld/day-01/LldDay01.java`.
 
 **Requirements-to-classes drill (15 min):** take this statement and extract the classes, fields and methods yourself (nouns -> classes/fields, verbs -> methods), then list the invariants: "A shopping cart holds items with quantities. A user can add or remove items, apply one coupon, and check out. Quantity must be positive; the total cannot be negative; an empty cart cannot be checked out." Write the class list and invariants first, then code `Cart` and `CartItem` using your `Money`. Note one thing you would deliberately leave out today (e.g. payments, inventory).
 

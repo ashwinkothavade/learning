@@ -1,2 +1,4 @@
-# Day 1 DSA: LeetCode 1 Two Sum
-Task: implement `two_sum.cpp` (C++17) with asserts. See daily/day-01.md section B. Solution not yet submitted.
+# Day 1 DSA (C++): runnable workspace
+Edit `two_sum.cpp` in place. Run from the repo root:
+
+    g++ -std=c++17 -Wall -Wextra -o /tmp/two_sum dsa/day-01/two_sum.cpp && /tmp/two_sum
